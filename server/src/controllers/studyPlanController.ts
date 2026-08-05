@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 import type { AuthRequest } from '../middleware/auth.js';
-import { supabaseAdmin } from '../utils/supabase.js';
+
 import { safeError } from '../middleware/error.js';
 import { generateStudyPlan } from '../services/interviewAi.js';
 import type { z } from 'zod';
@@ -13,7 +13,7 @@ export async function createStudyPlan(req: AuthRequest, res: Response): Promise<
     const userId = req.user!.id;
     const body = req.body as StudyPlanRequest;
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await req.db!
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -29,7 +29,7 @@ export async function createStudyPlan(req: AuthRequest, res: Response): Promise<
     const dailyTime = body.daily_time || profile.daily_preparation_minutes || 60;
 
     if (body.session_id) {
-      const { data: session } = await supabaseAdmin
+      const { data: session } = await req.db!
         .from('interview_sessions')
         .select('*')
         .eq('id', body.session_id)
@@ -57,7 +57,7 @@ export async function createStudyPlan(req: AuthRequest, res: Response): Promise<
       daily_time: dailyTime,
     });
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('study_plans')
       .insert({
         user_id: userId,
@@ -78,7 +78,7 @@ export async function createStudyPlan(req: AuthRequest, res: Response): Promise<
 
 export async function listStudyPlans(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('study_plans')
       .select('id, plan_title, session_id, created_at, updated_at')
       .eq('user_id', req.user!.id)
@@ -93,7 +93,7 @@ export async function listStudyPlans(req: AuthRequest, res: Response): Promise<v
 
 export async function getStudyPlan(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('study_plans')
       .select('*')
       .eq('id', Array.isArray(req.params.id) ? req.params.id[0] : req.params.id)

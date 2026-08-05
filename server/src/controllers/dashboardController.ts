@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 import type { AuthRequest } from '../middleware/auth.js';
-import { supabaseAdmin } from '../utils/supabase.js';
+
 import { safeError } from '../middleware/error.js';
 
 export async function getDashboard(req: AuthRequest, res: Response): Promise<void> {
@@ -8,15 +8,15 @@ export async function getDashboard(req: AuthRequest, res: Response): Promise<voi
     const userId = req.user!.id;
 
     const [profileRes, sessionsRes, progressRes, plansRes] = await Promise.all([
-      supabaseAdmin.from('profiles').select('*').eq('id', userId).maybeSingle(),
-      supabaseAdmin
+      req.db!.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      req.db!
         .from('interview_sessions')
         .select('id, target_role, topic, difficulty, status, overall_score, started_at, completed_at, total_questions')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(10),
-      supabaseAdmin.from('progress').select('*').eq('user_id', userId).order('updated_at', { ascending: false }),
-      supabaseAdmin
+      req.db!.from('progress').select('*').eq('user_id', userId).order('updated_at', { ascending: false }),
+      req.db!
         .from('study_plans')
         .select('id, plan_title, created_at')
         .eq('user_id', userId)
@@ -57,7 +57,7 @@ export async function getDashboard(req: AuthRequest, res: Response): Promise<voi
 
 export async function getProgress(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('progress')
       .select('*')
       .eq('user_id', req.user!.id)

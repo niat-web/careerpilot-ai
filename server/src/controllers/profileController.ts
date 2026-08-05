@@ -1,13 +1,12 @@
 import type { Response } from 'express';
 import type { AuthRequest } from '../middleware/auth.js';
-import { supabaseAdmin } from '../utils/supabase.js';
 import { safeError } from '../middleware/error.js';
 import type { ProfileInput } from '../validation/schemas.js';
 
 export async function getProfile(req: AuthRequest, res: Response): Promise<void> {
   try {
     const userId = req.user!.id;
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -16,7 +15,7 @@ export async function getProfile(req: AuthRequest, res: Response): Promise<void>
     if (error) throw error;
 
     if (!data) {
-      const { data: created, error: createErr } = await supabaseAdmin
+      const { data: created, error: createErr } = await req.db!
         .from('profiles')
         .insert({
           id: userId,
@@ -56,7 +55,7 @@ export async function updateProfile(req: AuthRequest, res: Response): Promise<vo
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('profiles')
       .upsert({ id: userId, ...payload })
       .select('*')

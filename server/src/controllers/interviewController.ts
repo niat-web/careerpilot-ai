@@ -1,6 +1,6 @@
 import type { Response } from 'express';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AuthRequest } from '../middleware/auth.js';
-import { supabaseAdmin } from '../utils/supabase.js';
 import { safeError } from '../middleware/error.js';
 import {
   generateInterviewQuestion,
@@ -13,8 +13,8 @@ function paramId(value: string | string[]): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
-async function getOwnedSession(sessionId: string, userId: string) {
-  const { data, error } = await supabaseAdmin
+async function getOwnedSession(db: SupabaseClient, sessionId: string, userId: string) {
+  const { data, error } = await db
     .from('interview_sessions')
     .select('*')
     .eq('id', sessionId)
@@ -25,15 +25,15 @@ async function getOwnedSession(sessionId: string, userId: string) {
   return data;
 }
 
-async function setProcessingStatus(sessionId: string, status: string) {
-  await supabaseAdmin
+async function setProcessingStatus(db: SupabaseClient, sessionId: string, status: string) {
+  await db
     .from('interview_sessions')
     .update({ processing_status: status, updated_at: new Date().toISOString() })
     .eq('id', sessionId);
 }
 
-async function updateProgress(userId: string, topic: string, score: number) {
-  const { data: existing } = await supabaseAdmin
+async function updateProgress(db: SupabaseClient, userId: string, topic: string, score: number) {
+  const { data: existing } = await db
     .from('progress')
     .select('*')
     .eq('user_id', userId)
@@ -45,7 +45,7 @@ async function updateProgress(userId: string, topic: string, score: number) {
     const average =
       Math.round((((Number(existing.average_score) || 0) * (attempts - 1) + score) / attempts) * 10) / 10;
     const best = Math.max(Number(existing.best_score) || 0, score);
-    await supabaseAdmin
+    await db
       .from('progress')
       .update({
         attempts,
@@ -56,7 +56,7 @@ async function updateProgress(userId: string, topic: string, score: number) {
       })
       .eq('id', existing.id);
   } else {
-    await supabaseAdmin.from('progress').insert({
+    await db.from('progress').insert({
       user_id: userId,
       topic,
       attempts: 1,
@@ -72,7 +72,7 @@ export async function startInterview(req: AuthRequest, res: Response): Promise<v
     const userId = req.user!.id;
     const body = req.body as InterviewSetup;
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await req.db!
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -83,7 +83,7 @@ export async function startInterview(req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    const { data: session, error } = await supabaseAdmin
+    const { data: session, error } = await req.db!
       .from('interview_sessions')
       .insert({
         user_id: userId,
@@ -112,7 +112,7 @@ export async function startInterview(req: AuthRequest, res: Response): Promise<v
         weak_areas: profile.weak_technologies || [],
       });
 
-      const { data: question, error: qErr } = await supabaseAdmin
+      const { data: question, error: qErr } = await req.db!
         .from('interview_questions')
         .insert({
           session_id: session.id,
@@ -129,7 +129,7 @@ export async function startInterview(req: AuthRequest, res: Response): Promise<v
 
       if (qErr) throw qErr;
 
-      await supabaseAdmin
+      await req.db!
         .from('interview_sessions')
         .update({
           current_question_number: 1,
@@ -143,7 +143,7 @@ export async function startInterview(req: AuthRequest, res: Response): Promise<v
         question,
       });
     } catch (aiErr) {
-      await setProcessingStatus(session.id, 'failed');
+      await setProcessingStatus(req.db!, session.id, 'failed');
       console.error('[startInterview AI]', aiErr);
       res.status(502).json({
         error: 'Could not generate the first interview question. Please try again.',
@@ -157,7 +157,7 @@ export async function startInterview(req: AuthRequest, res: Response): Promise<v
 
 export async function listInterviews(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await req.db!
       .from('interview_sessions')
       .select(
         'id, target_role, interview_type, topic, difficulty, total_questions, status, overall_score, performance_level, started_at, completed_at, created_at'
@@ -174,20 +174,20 @@ export async function listInterviews(req: AuthRequest, res: Response): Promise<v
 
 export async function getInterview(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const session = await getOwnedSession(paramId(req.params.id), req.user!.id);
+    const session = await getOwnedSession(req.db!, paramId(req.params.id), req.user!.id);
     if (!session) {
       res.status(404).json({ error: 'Interview not found.' });
       return;
     }
 
     const [questionsRes, answersRes] = await Promise.all([
-      supabaseAdmin
+      req.db!
         .from('interview_questions')
         .select('id, session_id, question, topic, difficulty, skill_tested, question_order, created_at')
         .eq('session_id', session.id)
         .eq('user_id', req.user!.id)
         .order('question_order', { ascending: true }),
-      supabaseAdmin
+      req.db!
         .from('interview_answers')
         .select('*')
         .eq('session_id', session.id)
@@ -211,7 +211,7 @@ export async function getInterview(req: AuthRequest, res: Response): Promise<voi
 export async function generateNextQuestion(req: AuthRequest, res: Response): Promise<void> {
   try {
     const userId = req.user!.id;
-    const session = await getOwnedSession(paramId(req.params.id), userId);
+    const session = await getOwnedSession(req.db!, paramId(req.params.id), userId);
 
     if (!session) {
       res.status(404).json({ error: 'Interview not found.' });
@@ -226,7 +226,7 @@ export async function generateNextQuestion(req: AuthRequest, res: Response): Pro
       return;
     }
 
-    const { count: answerCount } = await supabaseAdmin
+    const { count: answerCount } = await req.db!
       .from('interview_answers')
       .select('*', { count: 'exact', head: true })
       .eq('session_id', session.id)
@@ -237,15 +237,15 @@ export async function generateNextQuestion(req: AuthRequest, res: Response): Pro
       return;
     }
 
-    await setProcessingStatus(session.id, 'generating_question');
+    await setProcessingStatus(req.db!, session.id, 'generating_question');
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await req.db!
       .from('profiles')
       .select('experience_level, weak_technologies')
       .eq('id', userId)
       .maybeSingle();
 
-    const { data: previous } = await supabaseAdmin
+    const { data: previous } = await req.db!
       .from('interview_questions')
       .select('question')
       .eq('session_id', session.id)
@@ -263,7 +263,7 @@ export async function generateNextQuestion(req: AuthRequest, res: Response): Pro
         weak_areas: profile?.weak_technologies || [],
       });
 
-      const { data: question, error: qErr } = await supabaseAdmin
+      const { data: question, error: qErr } = await req.db!
         .from('interview_questions')
         .insert({
           session_id: session.id,
@@ -280,7 +280,7 @@ export async function generateNextQuestion(req: AuthRequest, res: Response): Pro
 
       if (qErr) throw qErr;
 
-      await supabaseAdmin
+      await req.db!
         .from('interview_sessions')
         .update({
           current_question_number: nextOrder,
@@ -291,7 +291,7 @@ export async function generateNextQuestion(req: AuthRequest, res: Response): Pro
 
       res.json({ question, current_question_number: nextOrder });
     } catch (aiErr) {
-      await setProcessingStatus(session.id, 'failed');
+      await setProcessingStatus(req.db!, session.id, 'failed');
       console.error('[generateNextQuestion]', aiErr);
       res.status(502).json({ error: 'Could not generate the next question. Please try again.' });
     }
@@ -304,7 +304,7 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
   try {
     const userId = req.user!.id;
     const body = req.body as StudentAnswerInput;
-    const session = await getOwnedSession(paramId(req.params.id), userId);
+    const session = await getOwnedSession(req.db!, paramId(req.params.id), userId);
 
     if (!session) {
       res.status(404).json({ error: 'Interview not found.' });
@@ -315,7 +315,7 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    const { data: question, error: qErr } = await supabaseAdmin
+    const { data: question, error: qErr } = await req.db!
       .from('interview_questions')
       .select('*')
       .eq('id', body.question_id)
@@ -329,7 +329,7 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    const { data: existingAnswer } = await supabaseAdmin
+    const { data: existingAnswer } = await req.db!
       .from('interview_answers')
       .select('id')
       .eq('question_id', question.id)
@@ -341,9 +341,9 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
-    await setProcessingStatus(session.id, 'evaluating_answer');
+    await setProcessingStatus(req.db!, session.id, 'evaluating_answer');
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await req.db!
       .from('profiles')
       .select('experience_level')
       .eq('id', userId)
@@ -357,9 +357,9 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
         experience_level: profile?.experience_level || 'Beginner',
       });
 
-      await setProcessingStatus(session.id, 'saving_result');
+      await setProcessingStatus(req.db!, session.id, 'saving_result');
 
-      const { data: answer, error: aErr } = await supabaseAdmin
+      const { data: answer, error: aErr } = await req.db!
         .from('interview_answers')
         .insert({
           question_id: question.id,
@@ -382,10 +382,10 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
 
       if (aErr) throw aErr;
 
-      await updateProgress(userId, question.topic || session.topic, evaluation.score);
-      await setProcessingStatus(session.id, 'generating_feedback');
+      await updateProgress(req.db!, userId, question.topic || session.topic, evaluation.score);
+      await setProcessingStatus(req.db!, session.id, 'generating_feedback');
 
-      const answered = (await supabaseAdmin
+      const answered = (await req.db!
         .from('interview_answers')
         .select('*', { count: 'exact', head: true })
         .eq('session_id', session.id)
@@ -393,7 +393,7 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
 
       const isLast = answered >= session.total_questions;
 
-      await supabaseAdmin
+      await req.db!
         .from('interview_sessions')
         .update({
           processing_status: isLast ? 'waiting' : 'question_ready',
@@ -408,7 +408,7 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
         total_questions: session.total_questions,
       });
     } catch (aiErr) {
-      await setProcessingStatus(session.id, 'failed');
+      await setProcessingStatus(req.db!, session.id, 'failed');
       console.error('[submitAnswer]', aiErr);
       res.status(502).json({ error: 'Could not evaluate your answer. Please try again.' });
     }
@@ -420,7 +420,7 @@ export async function submitAnswer(req: AuthRequest, res: Response): Promise<voi
 export async function completeInterview(req: AuthRequest, res: Response): Promise<void> {
   try {
     const userId = req.user!.id;
-    const session = await getOwnedSession(paramId(req.params.id), userId);
+    const session = await getOwnedSession(req.db!, paramId(req.params.id), userId);
 
     if (!session) {
       res.status(404).json({ error: 'Interview not found.' });
@@ -431,7 +431,7 @@ export async function completeInterview(req: AuthRequest, res: Response): Promis
       return;
     }
 
-    const { data: answers, error: aErr } = await supabaseAdmin
+    const { data: answers, error: aErr } = await req.db!
       .from('interview_answers')
       .select('*, interview_questions(question, topic, skill_tested)')
       .eq('session_id', session.id)
@@ -446,7 +446,7 @@ export async function completeInterview(req: AuthRequest, res: Response): Promis
       return;
     }
 
-    await setProcessingStatus(session.id, 'generating_feedback');
+    await setProcessingStatus(req.db!, session.id, 'generating_feedback');
 
     try {
       const report = await generateFinalReport({
@@ -463,7 +463,7 @@ export async function completeInterview(req: AuthRequest, res: Response): Promis
         })),
       });
 
-      const { data: updated, error: uErr } = await supabaseAdmin
+      const { data: updated, error: uErr } = await req.db!
         .from('interview_sessions')
         .update({
           status: 'completed',
@@ -488,7 +488,7 @@ export async function completeInterview(req: AuthRequest, res: Response): Promis
       if (uErr) throw uErr;
       res.json({ session: updated, report });
     } catch (aiErr) {
-      await setProcessingStatus(session.id, 'failed');
+      await setProcessingStatus(req.db!, session.id, 'failed');
       console.error('[completeInterview]', aiErr);
       res.status(502).json({ error: 'Could not generate the final report. Please try again.' });
     }

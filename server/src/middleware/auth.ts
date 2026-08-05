@@ -1,10 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { User } from '@supabase/supabase-js';
-import { verifyUserToken } from '../utils/supabase.js';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
+import { getDbClient, verifyUserToken } from '../utils/supabase.js';
 
 export interface AuthRequest extends Request {
   user?: User;
   token?: string;
+  db?: SupabaseClient;
 }
 
 export async function requireAuth(
@@ -29,6 +30,7 @@ export async function requireAuth(
 
     req.user = user;
     req.token = token;
+    req.db = getDbClient(token);
     next();
   } catch (err) {
     console.error('[Auth]', err);
