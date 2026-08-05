@@ -1,20 +1,12 @@
+import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
 import { loginSchema, registerSchema } from '../lib/validation';
 import { ErrorAlert } from './ErrorAlert';
 
-type LoginData = {
-  email: string;
-  password: string;
-};
-
-type RegisterData = {
-  full_name: string;
-  email: string;
-  password: string;
-};
-
+type LoginData = { email: string; password: string };
+type RegisterData = { full_name: string; email: string; password: string };
 type Mode = 'login' | 'register';
 
 type Props = {
@@ -24,10 +16,49 @@ type Props = {
 };
 
 export function AuthForm({ mode, onSubmit, error }: Props) {
-  if (mode === 'register') {
-    return <RegisterForm onSubmit={onSubmit} error={error} />;
-  }
+  if (mode === 'register') return <RegisterForm onSubmit={onSubmit} error={error} />;
   return <LoginForm onSubmit={onSubmit} error={error} />;
+}
+
+function AuthShell({
+  title,
+  subtitle,
+  children,
+  footer,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+  footer: ReactNode;
+}) {
+  return (
+    <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl lg:grid-cols-2">
+      <div className="relative hidden overflow-hidden bg-ink text-white lg:block">
+        <div className="hero-grid absolute inset-0" />
+        <div className="relative flex h-full flex-col justify-between p-10">
+          <p className="font-display text-3xl text-accent-soft">CareerPilot AI</p>
+          <div>
+            <h2 className="max-w-md font-display text-3xl leading-snug">
+              Practice with structure. Improve with feedback.
+            </h2>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">
+              Built for undergraduates and entry-level developers preparing for technical interviews.
+            </p>
+          </div>
+          <p className="text-xs text-white/40">Gemini-powered coaching · Supabase-secured sessions</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center px-4 py-12 sm:px-8">
+        <div className="w-full max-w-md animate-fade-up">
+          <h1 className="font-display text-3xl text-ink">{title}</h1>
+          <p className="mt-2 text-sm text-ink-muted">{subtitle}</p>
+          <div className="mt-8">{children}</div>
+          <div className="mt-6 text-center text-sm text-ink-muted">{footer}</div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function RegisterForm({
@@ -41,57 +72,37 @@ function RegisterForm({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterData>({
-    resolver: zodResolver(registerSchema),
-  });
+  } = useForm<RegisterData>({ resolver: zodResolver(registerSchema) });
 
   return (
-    <form
-      onSubmit={handleSubmit(async (data) => onSubmit(data))}
-      className="mx-auto w-full max-w-md space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+    <AuthShell
+      title="Create your account"
+      subtitle="Start practicing technical interviews with CareerPilot AI."
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link to="/login" className="font-semibold text-accent hover:underline">
+            Log in
+          </Link>
+        </>
+      }
     >
-      <div>
-        <h1 className="font-display text-3xl text-ink">Create your account</h1>
-        <p className="mt-1 text-sm text-ink-muted">
-          Start practicing technical interviews with CareerPilot AI.
-        </p>
-      </div>
-
-      {error && <ErrorAlert message={error} />}
-
-      <div>
-        <label htmlFor="full_name" className="mb-1 block text-sm font-medium">
-          Full name
-        </label>
-        <input
-          id="full_name"
-          type="text"
-          autoComplete="name"
-          className="w-full rounded-xl border border-border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
-          {...register('full_name')}
-        />
-        {errors.full_name && (
-          <p className="mt-1 text-xs text-danger">{errors.full_name.message}</p>
-        )}
-      </div>
-
-      <EmailPasswordFields register={register} errors={errors} mode="register" />
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60"
-      >
-        {isSubmitting ? 'Please wait…' : 'Create account'}
-      </button>
-
-      <p className="text-center text-sm text-ink-muted">
-        Already have an account?{' '}
-        <Link to="/login" className="font-medium text-accent hover:underline">
-          Log in
-        </Link>
-      </p>
-    </form>
+      <form onSubmit={handleSubmit(async (d) => onSubmit(d))} className="space-y-4">
+        {error && <ErrorAlert message={error} />}
+        <Field label="Full name" error={errors.full_name?.message}>
+          <input className="input-field" autoComplete="name" {...register('full_name')} />
+        </Field>
+        <Field label="Email" error={errors.email?.message}>
+          <input type="email" className="input-field" autoComplete="email" {...register('email')} />
+        </Field>
+        <Field label="Password" error={errors.password?.message}>
+          <input type="password" className="input-field" autoComplete="new-password" {...register('password')} />
+        </Field>
+        <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full py-3">
+          {isSubmitting ? 'Creating account…' : 'Create account'}
+        </button>
+      </form>
+    </AuthShell>
   );
 }
 
@@ -106,82 +117,48 @@ function LoginForm({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginData>({
-    resolver: zodResolver(loginSchema),
-  });
+  } = useForm<LoginData>({ resolver: zodResolver(loginSchema) });
 
   return (
-    <form
-      onSubmit={handleSubmit(async (data) => onSubmit(data))}
-      className="mx-auto w-full max-w-md space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+    <AuthShell
+      title="Welcome back"
+      subtitle="Log in to continue your interview preparation."
+      footer={
+        <>
+          New here?{' '}
+          <Link to="/register" className="font-semibold text-accent hover:underline">
+            Create an account
+          </Link>
+        </>
+      }
     >
-      <div>
-        <h1 className="font-display text-3xl text-ink">Welcome back</h1>
-        <p className="mt-1 text-sm text-ink-muted">Log in to continue your interview prep.</p>
-      </div>
-
-      {error && <ErrorAlert message={error} />}
-
-      <EmailPasswordFields register={register} errors={errors} mode="login" />
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60"
-      >
-        {isSubmitting ? 'Please wait…' : 'Log in'}
-      </button>
-
-      <p className="text-center text-sm text-ink-muted">
-        New here?{' '}
-        <Link to="/register" className="font-medium text-accent hover:underline">
-          Create an account
-        </Link>
-      </p>
-    </form>
+      <form onSubmit={handleSubmit(async (d) => onSubmit(d))} className="space-y-4">
+        {error && <ErrorAlert message={error} />}
+        <Field label="Email" error={errors.email?.message}>
+          <input type="email" className="input-field" autoComplete="email" {...register('email')} />
+        </Field>
+        <Field label="Password" error={errors.password?.message}>
+          <input
+            type="password"
+            className="input-field"
+            autoComplete="current-password"
+            {...register('password')}
+          />
+        </Field>
+        <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full py-3">
+          {isSubmitting ? 'Signing in…' : 'Log in'}
+        </button>
+      </form>
+    </AuthShell>
   );
 }
 
-function EmailPasswordFields({
-  register,
-  errors,
-  mode,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  errors: any;
-  mode: Mode;
-}) {
+function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
   return (
-    <>
-      <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          className="w-full rounded-xl border border-border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
-          {...register('email')}
-        />
-        {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-          className="w-full rounded-xl border border-border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
-          {...register('password')}
-        />
-        {errors.password && <p className="mt-1 text-xs text-danger">{errors.password.message}</p>}
-      </div>
-    </>
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
+      {children}
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
+    </div>
   );
 }

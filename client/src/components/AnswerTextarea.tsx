@@ -13,16 +13,17 @@ export function AnswerTextarea({ value, onChange, disabled, error }: Props) {
       </label>
       <textarea
         id="student-answer"
-        rows={8}
+        rows={9}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write your answer here…"
-        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-ink outline-none ring-accent focus:ring-2 disabled:opacity-60"
+        className="input-field min-h-[180px] resize-y leading-relaxed disabled:opacity-60"
         maxLength={5000}
       />
       <div className="mt-1 flex justify-between text-xs text-ink-muted">
-        <span>{error || `${value.length}/5000 characters`}</span>
+        <span>{error || 'Be specific. Mention concepts, trade-offs, and examples.'}</span>
+        <span>{value.length}/5000</span>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { StudyPlanCard } from '../components/StudyPlanCard';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorAlert } from '../components/ErrorAlert';
 import { EmptyState } from '../components/EmptyState';
+import { PageHeader } from '../components/PageHeader';
 import type { StudyPlan } from '../types';
 
 export function StudyPlanPage() {
@@ -61,23 +62,18 @@ export function StudyPlanPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl text-ink">Seven-day study plan</h1>
-          <p className="mt-2 text-sm text-ink-muted">
-            Generate a realistic prep schedule based on your weak areas
-            {sessionId ? ' and latest interview report' : ''}.
-          </p>
-        </div>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void generate()}
-          className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60"
-        >
-          {busy ? 'Generating…' : 'Generate new plan'}
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="Preparation"
+        title="Seven-day study plan"
+        description={`Generate a realistic prep schedule based on your weak areas${
+          sessionId ? ' and latest interview report' : ''
+        }.`}
+        actions={
+          <button type="button" disabled={busy} onClick={() => void generate()} className="btn btn-primary">
+            {busy ? 'Generating…' : 'Generate new plan'}
+          </button>
+        }
+      />
 
       {error && <ErrorAlert message={error} />}
 
@@ -88,12 +84,7 @@ export function StudyPlanPage() {
           title="No study plan yet"
           description="Generate a seven-day plan to organize your interview preparation."
           action={
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void generate()}
-              className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white"
-            >
+            <button type="button" disabled={busy} onClick={() => void generate()} className="btn btn-primary">
               Generate plan
             </button>
           }
@@ -108,14 +99,15 @@ export function StudyPlanPage() {
               <li key={plan.id}>
                 <button
                   type="button"
-                  className="text-sm font-medium text-accent hover:underline"
+                  className="text-sm font-semibold text-accent hover:underline"
                   onClick={() => {
                     void apiFetch<{ study_plan: StudyPlan }>(`/api/study-plans/${plan.id}`).then((res) =>
                       setActive(res.study_plan)
                     );
                   }}
                 >
-                  {plan.plan_title} · {plan.created_at ? new Date(plan.created_at).toLocaleDateString() : ''}
+                  {plan.plan_title} ·{' '}
+                  {plan.created_at ? new Date(plan.created_at).toLocaleDateString() : ''}
                 </button>
               </li>
             ))}

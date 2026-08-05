@@ -7,8 +7,10 @@ import { InterviewQuestionCard } from '../components/InterviewQuestionCard';
 import { AnswerTextarea } from '../components/AnswerTextarea';
 import { EvaluationResultCard } from '../components/EvaluationResultCard';
 import { ProcessingStatusBadge } from '../components/ProcessingStatusBadge';
+import { InterviewProgress } from '../components/InterviewProgress';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorAlert } from '../components/ErrorAlert';
+import { PageHeader } from '../components/PageHeader';
 import type { InterviewAnswer, InterviewQuestion, InterviewSession } from '../types';
 
 type InterviewPayload = {
@@ -63,8 +65,8 @@ export function LiveInterviewPage() {
 
   const status = processingStatus || data?.session.processing_status;
 
-  async function handleSubmitAnswer() {
-    if (!id || !currentQuestion) return;
+  const handleSubmitAnswer = useCallback(async () => {
+    if (!id || !currentQuestion || busy || answeredCurrent) return;
     if (answer.trim().length < 10) {
       setError('Please write a longer answer (at least 10 characters).');
       return;
@@ -90,7 +92,18 @@ export function LiveInterviewPage() {
     } finally {
       setBusy(false);
     }
-  }
+  }, [id, currentQuestion, busy, answeredCurrent, answer, load]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        void handleSubmitAnswer();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleSubmitAnswer]);
 
   async function handleNextQuestion() {
     if (!id) return;
@@ -126,7 +139,7 @@ export function LiveInterviewPage() {
     return (
       <div className="space-y-4">
         <ErrorAlert message={error || 'Interview not found.'} />
-        <Link to="/interview/new" className="text-accent hover:underline">
+        <Link to="/interview/new" className="font-semibold text-accent hover:underline">
           Start a new interview
         </Link>
       </div>
@@ -135,18 +148,25 @@ export function LiveInterviewPage() {
 
   const answeredCount = data.answers.length;
   const isLastAnswered = answeredCount >= data.session.total_questions;
+  const progressCurrent = Math.min(
+    data.session.total_questions,
+    answeredCurrent ? answeredCount : Math.max(answeredCount, currentQuestion.question_order - 1)
+  );
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl text-ink">Live interview</h1>
-          <p className="text-sm text-ink-muted">
-            {data.session.target_role} · {data.session.topic} · {data.session.difficulty}
-          </p>
-        </div>
-        <ProcessingStatusBadge status={status} />
-      </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageHeader
+        eyebrow="Live interview"
+        title={`${data.session.target_role}`}
+        description={`${data.session.topic} · ${data.session.interview_type} · ${data.session.difficulty}`}
+        actions={<ProcessingStatusBadge status={status} />}
+      />
+
+      <InterviewProgress
+        current={isLastAnswered ? data.session.total_questions : Math.max(progressCurrent, answeredCount)}
+        total={data.session.total_questions}
+        label={`Question ${currentQuestion.question_order} of ${data.session.total_questions}`}
+      />
 
       {error && <ErrorAlert message={error} onClose={() => setError(null)} />}
 
@@ -157,26 +177,27 @@ export function LiveInterviewPage() {
       />
 
       {!answeredCurrent && (
-        <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="surface-panel space-y-4 p-6">
           <AnswerTextarea value={answer} onChange={setAnswer} disabled={busy} />
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void handleSubmitAnswer()}
-            className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60"
-          >
-            {busy ? 'Evaluating…' : 'Submit answer'}
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-ink-muted">Shortcut: Ctrl / ⌘ + Enter to submit</p>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleSubmitAnswer()}
+              className="btn btn-primary"
+            >
+              {busy ? 'Evaluating…' : 'Submit answer'}
+            </button>
+          </div>
         </div>
       )}
 
-      {(latestEval ||
-        data.answers.find((a) => a.question_id === currentQuestion.id)) && (
+      {(latestEval || data.answers.find((a) => a.question_id === currentQuestion.id)) && (
         <>
           <EvaluationResultCard
             evaluation={
-              latestEval ||
-              data.answers.find((a) => a.question_id === currentQuestion.id)!
+              latestEval || data.answers.find((a) => a.question_id === currentQuestion.id)!
             }
           />
           <div className="flex flex-wrap gap-3">
@@ -185,7 +206,7 @@ export function LiveInterviewPage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void handleNextQuestion()}
-                className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60"
+                className="btn btn-primary"
               >
                 {busy ? 'Loading…' : 'Next question'}
               </button>
@@ -194,7 +215,7 @@ export function LiveInterviewPage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void handleComplete()}
-                className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-white hover:bg-ink/90 disabled:opacity-60"
+                className="btn btn-dark"
               >
                 {busy ? 'Generating report…' : 'Finish & view report'}
               </button>

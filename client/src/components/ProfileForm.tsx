@@ -71,7 +71,7 @@ export function ProfileForm({ initial, submitLabel = 'Save profile', onSubmit, e
           onboarding_completed: true,
         });
       })}
-      className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+      className="space-y-4 surface-panel p-6"
     >
       {error && <ErrorAlert message={error} />}
 

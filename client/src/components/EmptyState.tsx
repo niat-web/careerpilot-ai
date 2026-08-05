@@ -8,7 +8,7 @@ type Props = {
 
 export function EmptyState({ title, description, action }: Props) {
   return (
-    <div className="rounded-2xl border border-dashed border-border bg-white/60 px-6 py-12 text-center">
+    <div className="surface-panel border-dashed px-6 py-14 text-center animate-fade-up">
       <h3 className="font-display text-xl text-ink">{title}</h3>
       {description && <p className="mx-auto mt-2 max-w-md text-sm text-ink-muted">{description}</p>}
       {action && <div className="mt-6">{action}</div>}

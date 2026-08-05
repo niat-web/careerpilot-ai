@@ -8,16 +8,11 @@ export function ErrorAlert({ message, onClose }: Props) {
   return (
     <div
       role="alert"
-      className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+      className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-sm text-danger"
     >
       <p>{message}</p>
       {onClose && (
-        <button
-          type="button"
-          onClick={onClose}
-          className="shrink-0 text-red-600 hover:text-red-900"
-          aria-label="Dismiss error"
-        >
+        <button type="button" onClick={onClose} className="shrink-0 font-semibold" aria-label="Dismiss error">
           ×
         </button>
       )}

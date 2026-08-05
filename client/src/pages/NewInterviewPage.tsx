@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InterviewSetupForm } from '../components/InterviewSetupForm';
+import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../lib/api';
 import type { InterviewQuestion, InterviewSession } from '../types';
@@ -12,13 +13,11 @@ export function NewInterviewPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="font-display text-3xl text-ink">Configure your interview</h1>
-        <p className="mt-2 text-sm text-ink-muted">
-          Choose a role, topic, and difficulty. CareerPilot will generate one question at a time.
-        </p>
-      </div>
-
+      <PageHeader
+        eyebrow="Practice"
+        title="Configure your interview"
+        description="Choose a role, topic, and difficulty. CareerPilot generates one question at a time and evaluates each answer."
+      />
       <InterviewSetupForm
         defaultRole={profile?.target_role || undefined}
         defaultDifficulty={profile?.preferred_difficulty || undefined}
@@ -28,10 +27,7 @@ export function NewInterviewPage() {
           try {
             const res = await apiFetch<{ session: InterviewSession; question: InterviewQuestion }>(
               '/api/interviews/start',
-              {
-                method: 'POST',
-                body: JSON.stringify(data),
-              }
+              { method: 'POST', body: JSON.stringify(data) }
             );
             navigate(`/interview/${res.session.id}`);
           } catch (err) {

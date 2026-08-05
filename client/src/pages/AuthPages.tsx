@@ -11,21 +11,19 @@ export function RegisterPage() {
 
   return (
     <GuestOnly>
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <AuthForm
-          mode="register"
-          error={error}
-          onSubmit={async (data) => {
-            setError(null);
-            try {
-              await signUp(data.full_name, data.email, data.password);
-              navigate('/onboarding');
-            } catch (err) {
-              setError(err instanceof Error ? err.message : 'Registration failed');
-            }
-          }}
-        />
-      </div>
+      <AuthForm
+        mode="register"
+        error={error}
+        onSubmit={async (data) => {
+          setError(null);
+          try {
+            await signUp(data.full_name, data.email, data.password);
+            navigate('/onboarding');
+          } catch (err) {
+            setError(err instanceof Error ? err.message : 'Registration failed');
+          }
+        }}
+      />
     </GuestOnly>
   );
 }
@@ -37,21 +35,19 @@ export function LoginPage() {
 
   return (
     <GuestOnly>
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <AuthForm
-          mode="login"
-          error={error}
-          onSubmit={async (data) => {
-            setError(null);
-            try {
-              await signIn(data.email, data.password);
-              navigate('/dashboard');
-            } catch (err) {
-              setError(err instanceof Error ? err.message : 'Login failed');
-            }
-          }}
-        />
-      </div>
+      <AuthForm
+        mode="login"
+        error={error}
+        onSubmit={async (data) => {
+          setError(null);
+          try {
+            await signIn(data.email, data.password);
+            navigate('/dashboard');
+          } catch (err) {
+            setError(err instanceof Error ? err.message : 'Login failed');
+          }
+        }}
+      />
     </GuestOnly>
   );
 }

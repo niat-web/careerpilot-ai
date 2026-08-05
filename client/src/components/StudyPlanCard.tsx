@@ -9,7 +9,7 @@ export function StudyPlanCard({ plan }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="surface-panel p-6">
         <h2 className="font-display text-2xl text-ink">{plan.plan_title}</h2>
         <p className="mt-1 text-sm text-ink-muted">
           Created {plan.created_at ? new Date(plan.created_at).toLocaleString() : ''}
@@ -18,14 +18,9 @@ export function StudyPlanCard({ plan }: Props) {
 
       <div className="grid gap-4 md:grid-cols-2">
         {days.map((day) => (
-          <article
-            key={day.day}
-            className="rounded-2xl border border-border bg-card p-5 shadow-sm animate-fade-up"
-          >
+          <article key={day.day} className="surface-panel p-5 animate-fade-up">
             <div className="mb-2 flex items-center justify-between">
-              <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent-dark">
-                Day {day.day}
-              </span>
+              <span className="chip border-transparent bg-accent-soft text-accent-dark">Day {day.day}</span>
               <span className="text-xs text-ink-muted">{day.duration_minutes} min</span>
             </div>
             <h3 className="font-display text-lg text-ink">{day.topic}</h3>

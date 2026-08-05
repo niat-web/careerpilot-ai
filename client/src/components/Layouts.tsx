@@ -7,9 +7,9 @@ import { LoadingState } from './LoadingState';
 
 export function PublicLayout() {
   return (
-    <div className="min-h-screen">
+    <div className="page-shell flex min-h-full flex-col">
       <Navbar />
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>
@@ -20,7 +20,13 @@ export function AppLayout() {
   const { user, profile, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <LoadingState label="Checking your session…" />;
+  if (loading) {
+    return (
+      <div className="page-shell flex min-h-full items-center justify-center">
+        <LoadingState label="Checking your session…" />
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
 
   const onboardingDone = profile?.onboarding_completed;
@@ -28,12 +34,25 @@ export function AppLayout() {
     return <Navigate to="/onboarding" replace />;
   }
 
+  const isOnboarding = location.pathname === '/onboarding';
+
+  if (isOnboarding) {
+    return (
+      <div className="page-shell min-h-full">
+        <Navbar />
+        <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
+          <Outlet />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="mx-auto flex max-w-6xl gap-6 px-4 py-6">
-        <Sidebar />
-        <div className="min-w-0 flex-1">
+    <div className="app-shell page-shell">
+      <Sidebar />
+      <div className="app-main bg-transparent">
+        <Navbar />
+        <div className="app-content">
           <MobileNav />
           <Outlet />
         </div>
@@ -44,7 +63,13 @@ export function AppLayout() {
 
 export function GuestOnly({ children }: { children: ReactNode }) {
   const { user, profile, loading } = useAuth();
-  if (loading) return <LoadingState />;
+  if (loading) {
+    return (
+      <div className="page-shell flex min-h-full items-center justify-center">
+        <LoadingState />
+      </div>
+    );
+  }
   if (user) {
     return <Navigate to={profile?.onboarding_completed ? '/dashboard' : '/onboarding'} replace />;
   }

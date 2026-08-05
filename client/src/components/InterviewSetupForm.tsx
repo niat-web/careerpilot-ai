@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,7 +44,7 @@ export function InterviewSetupForm({ defaultRole, defaultDifficulty, onSubmit, e
   });
 
   const role = watch('target_role');
-  const topics = useMemo(() => TOPICS_BY_ROLE[role] || [], [role]);
+  const topics = TOPICS_BY_ROLE[role] || [];
 
   useEffect(() => {
     if (topics.length && !topics.includes(watch('topic'))) {
@@ -53,10 +53,7 @@ export function InterviewSetupForm({ defaultRole, defaultDifficulty, onSubmit, e
   }, [topics, setValue, watch]);
 
   return (
-    <form
-      onSubmit={handleSubmit(async (data) => onSubmit(data))}
-      className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-sm"
-    >
+    <form onSubmit={handleSubmit(async (data) => onSubmit(data))} className="surface-panel space-y-6 p-6">
       {error && <ErrorAlert message={error} />}
 
       <RoleSelector
@@ -66,12 +63,12 @@ export function InterviewSetupForm({ defaultRole, defaultDifficulty, onSubmit, e
       />
 
       <div>
-        <label className="mb-2 block text-sm font-medium">Interview type</label>
+        <label className="mb-2 block text-sm font-medium text-ink">Interview type</label>
         <div className="flex flex-wrap gap-2">
           {INTERVIEW_TYPES.map((type) => (
             <label key={type} className="cursor-pointer">
               <input type="radio" value={type} className="peer sr-only" {...register('interview_type')} />
-              <span className="inline-block rounded-full border border-border px-4 py-2 text-sm peer-checked:border-accent peer-checked:bg-accent peer-checked:text-white">
+              <span className="inline-block rounded-xl border border-border bg-white px-4 py-2 text-sm peer-checked:border-accent peer-checked:bg-accent peer-checked:text-white">
                 {type}
               </span>
             </label>
@@ -98,11 +95,7 @@ export function InterviewSetupForm({ defaultRole, defaultDifficulty, onSubmit, e
         onChange={(v) => setValue('total_questions', v)}
       />
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-xl bg-accent py-3 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60 sm:w-auto sm:px-8"
-      >
+      <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full py-3 sm:w-auto sm:px-8">
         {isSubmitting ? 'Starting interview…' : 'Start mock interview'}
       </button>
     </form>
