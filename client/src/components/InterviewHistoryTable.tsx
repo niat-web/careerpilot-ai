@@ -9,9 +9,9 @@ export function InterviewHistoryTable({ interviews }: Props) {
   if (!interviews.length) return null;
 
   return (
-    <div className="surface-panel overflow-x-auto">
+    <div className="surface-panel overflow-x-auto app-table-scroll">
       <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-2/80 text-xs uppercase tracking-[0.12em] text-ink-muted">
+        <thead className="border-b border-border bg-surface-2 text-xs uppercase tracking-[0.12em] text-ink-muted">
           <tr>
             <th className="px-4 py-3 font-semibold">Role</th>
             <th className="px-4 py-3 font-semibold">Topic</th>

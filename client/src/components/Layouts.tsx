@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Navbar } from './Navbar';
@@ -35,6 +36,26 @@ export function AppLayout() {
   }
 
   const isOnboarding = location.pathname === '/onboarding';
+
+  useEffect(() => {
+    if (isOnboarding) {
+      document.documentElement.classList.remove('app-scroll-lock');
+      return;
+    }
+
+    const mq = window.matchMedia('(min-width: 768px)');
+    const syncScrollLock = () => {
+      if (mq.matches) document.documentElement.classList.add('app-scroll-lock');
+      else document.documentElement.classList.remove('app-scroll-lock');
+    };
+
+    syncScrollLock();
+    mq.addEventListener('change', syncScrollLock);
+    return () => {
+      document.documentElement.classList.remove('app-scroll-lock');
+      mq.removeEventListener('change', syncScrollLock);
+    };
+  }, [isOnboarding]);
 
   if (isOnboarding) {
     return (
