@@ -1,6 +1,6 @@
 # Hackathon — Cursor KT Document
 
-guide for building and deploying a full-stack app with **Cursor**, using **GitHub**, **Vercel**, **Render**, and **Supabase**.
+Guide for building and deploying a full-stack app with **Cursor**, using **GitHub**, **Vercel**, **Render**, and **Supabase**.
 
 ---
 
