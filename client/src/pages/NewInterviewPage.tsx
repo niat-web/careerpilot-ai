@@ -14,7 +14,6 @@ export function NewInterviewPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        eyebrow="Practice"
         title="Configure your interview"
         description="Choose a role, topic, and difficulty. CareerPilot generates one question at a time and evaluates each answer."
       />

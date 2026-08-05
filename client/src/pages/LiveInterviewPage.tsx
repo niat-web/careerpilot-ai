@@ -156,7 +156,6 @@ export function LiveInterviewPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
-        eyebrow="Live interview"
         title={`${data.session.target_role}`}
         description={`${data.session.topic} · ${data.session.interview_type} · ${data.session.difficulty}`}
         actions={<ProcessingStatusBadge status={status} />}

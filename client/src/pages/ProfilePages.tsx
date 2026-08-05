@@ -14,7 +14,6 @@ export function OnboardingPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Onboarding"
         title="Set up your profile"
         description="Tell CareerPilot about your goals so interview questions match your level."
       />
@@ -48,7 +47,6 @@ export function ProfilePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Settings"
         title="Profile settings"
         description="Update your goals, experience, and daily preparation preferences."
       />

@@ -77,22 +77,22 @@ export function ProfileForm({ initial, submitLabel = 'Save profile', onSubmit, e
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Full name" error={errors.full_name?.message}>
-          <input className="input" {...register('full_name')} />
+          <input className="input-field" {...register('full_name')} />
         </Field>
         <Field label="University" error={errors.university?.message}>
-          <input className="input" {...register('university')} />
+          <input className="input-field" {...register('university')} />
         </Field>
         <Field label="Current year" error={errors.current_year?.message}>
-          <input className="input" placeholder="e.g. 3rd year" {...register('current_year')} />
+          <input className="input-field" placeholder="e.g. 3rd year" {...register('current_year')} />
         </Field>
         <Field label="Daily prep minutes" error={errors.daily_preparation_minutes?.message}>
-          <input type="number" className="input" {...register('daily_preparation_minutes')} />
+          <input type="number" className="input-field" {...register('daily_preparation_minutes')} />
         </Field>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Target role" error={errors.target_role?.message}>
-          <select className="input" {...register('target_role')}>
+          <select className="input-field" {...register('target_role')}>
             {TARGET_ROLES.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -101,14 +101,14 @@ export function ProfileForm({ initial, submitLabel = 'Save profile', onSubmit, e
           </select>
         </Field>
         <Field label="Experience level" error={errors.experience_level?.message}>
-          <select className="input" {...register('experience_level')}>
+          <select className="input-field" {...register('experience_level')}>
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>
             <option value="Advanced">Advanced</option>
           </select>
         </Field>
         <Field label="Preferred difficulty" error={errors.preferred_difficulty?.message}>
-          <select className="input" {...register('preferred_difficulty')}>
+          <select className="input-field" {...register('preferred_difficulty')}>
             {DIFFICULTIES.map((d) => (
               <option key={d} value={d}>
                 {d}
@@ -122,7 +122,7 @@ export function ProfileForm({ initial, submitLabel = 'Save profile', onSubmit, e
         label="Technologies you know (comma-separated)"
         error={errors.known_technologies?.message}
       >
-        <input className="input" placeholder="React, Node.js, SQL" {...register('known_technologies')} />
+        <input className="input-field" placeholder="React, Node.js, SQL" {...register('known_technologies')} />
       </Field>
 
       <Field
@@ -130,7 +130,7 @@ export function ProfileForm({ initial, submitLabel = 'Save profile', onSubmit, e
         error={errors.weak_technologies?.message}
       >
         <input
-          className="input"
+          className="input-field"
           placeholder="System design, TypeScript, Authentication"
           {...register('weak_technologies')}
         />
@@ -139,24 +139,10 @@ export function ProfileForm({ initial, submitLabel = 'Save profile', onSubmit, e
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-dark disabled:opacity-60"
+        className="btn btn-primary"
       >
         {isSubmitting ? 'Saving…' : submitLabel}
       </button>
-
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid var(--color-border);
-          padding: 0.625rem 0.75rem;
-          font-size: 0.875rem;
-          outline: none;
-        }
-        .input:focus {
-          box-shadow: 0 0 0 2px var(--color-accent);
-        }
-      `}</style>
     </form>
   );
 }

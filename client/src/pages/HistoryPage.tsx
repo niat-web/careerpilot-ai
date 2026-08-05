@@ -40,7 +40,6 @@ export function HistoryPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="History"
         title="Interview history"
         description="Search and filter past mocks, then open a report or resume an unfinished session."
         actions={

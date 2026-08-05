@@ -2,59 +2,50 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const links = [
-  { to: '/dashboard', label: 'Dashboard', hint: 'Overview' },
-  { to: '/interview/new', label: 'New interview', hint: 'Practice' },
-  { to: '/history', label: 'History', hint: 'Past sessions' },
-  { to: '/study-plan', label: 'Study plan', hint: '7-day plan' },
-  { to: '/profile', label: 'Profile', hint: 'Settings' },
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/interview/new', label: 'New interview' },
+  { to: '/history', label: 'History' },
+  { to: '/study-plan', label: 'Study plan' },
+  { to: '/profile', label: 'Profile' },
 ];
 
 export function Sidebar() {
   const { profile, signOut } = useAuth();
 
   return (
-    <aside className="hidden h-full min-h-screen flex-col border-r border-border bg-ink text-white md:flex animate-slide-in">
-      <div className="flex h-16 items-center border-b border-white/10 px-5">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-sm font-bold text-white">
+    <aside className="sidebar" aria-label="Main navigation">
+      <div className="sidebar-header">
+        <Link to="/dashboard" className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-xs font-bold text-white">
             CP
           </span>
-          <span className="font-display text-lg tracking-tight text-white">CareerPilot AI</span>
+          <span className="text-sm font-semibold text-white">CareerPilot</span>
         </Link>
-      </div>
-
-      <div className="px-5 py-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40">Workspace</p>
-        <p className="mt-2 truncate text-sm font-medium text-white">
+        <p className="mt-3 truncate text-xs text-white/50">
           {profile?.full_name || 'Student'}
-        </p>
-        <p className="truncate text-xs text-white/50">
-          {profile?.target_role || 'Complete your profile'}
+          {profile?.target_role ? ` · ${profile.target_role}` : ''}
         </p>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 pb-6">
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className={({ isActive }) =>
-              `block rounded-xl px-3 py-3 transition ${
-                isActive ? 'bg-accent text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
-              }`
-            }
-          >
-            <span className="block text-sm font-semibold">{link.label}</span>
-            <span className="block text-xs opacity-70">{link.hint}</span>
-          </NavLink>
-        ))}
-      </nav>
+      <div className="sidebar-body">
+        <nav className="space-y-0.5">
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => `sidebar-nav-link ${isActive ? 'active' : ''}`}
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="sidebar-footer">
         <button
           type="button"
           onClick={() => void signOut()}
-          className="w-full rounded-xl border border-white/15 px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+          className="sidebar-nav-link w-full text-left"
         >
           Log out
         </button>
@@ -65,14 +56,14 @@ export function Sidebar() {
 
 export function MobileNav() {
   return (
-    <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 md:hidden">
+    <nav className="mb-4 flex gap-1.5 overflow-x-auto border-b border-border pb-3 md:hidden" aria-label="Mobile navigation">
       {links.map((link) => (
         <NavLink
           key={link.to}
           to={link.to}
           className={({ isActive }) =>
-            `shrink-0 rounded-xl px-3 py-2 text-xs font-semibold ${
-              isActive ? 'bg-accent text-white' : 'border border-border bg-card text-ink-muted'
+            `shrink-0 rounded-md px-3 py-1.5 text-xs font-medium ${
+              isActive ? 'bg-accent text-white' : 'bg-card text-ink-muted border border-border'
             }`
           }
         >

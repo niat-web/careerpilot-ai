@@ -38,7 +38,7 @@ export function AppLayout() {
 
   if (isOnboarding) {
     return (
-      <div className="page-shell min-h-full">
+      <div className="page-shell min-h-full overflow-y-auto">
         <Navbar />
         <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
           <Outlet />
@@ -48,13 +48,15 @@ export function AppLayout() {
   }
 
   return (
-    <div className="app-shell page-shell">
+    <div className="app-shell">
       <Sidebar />
-      <div className="app-main bg-transparent">
+      <div className="app-main">
         <Navbar />
-        <div className="app-content">
-          <MobileNav />
-          <Outlet />
+        <div className="app-main-scroll">
+          <div className="app-content">
+            <MobileNav />
+            <Outlet />
+          </div>
         </div>
       </div>
     </div>

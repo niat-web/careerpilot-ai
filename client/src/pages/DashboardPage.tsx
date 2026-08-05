@@ -52,14 +52,13 @@ export function DashboardPage() {
   if (loading) return <LoadingState label="Loading your dashboard…" />;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Dashboard"
         title={`Welcome back${profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}`}
-        description="Track mock interviews, resume unfinished sessions, and keep momentum toward your target role."
+        description="Track mocks, resume sessions, and prep toward your target role."
         actions={
           <Link to="/interview/new" className="btn btn-primary">
-            Start new interview
+            New interview
           </Link>
         }
       />
@@ -67,12 +66,14 @@ export function DashboardPage() {
       {error && <ErrorAlert message={error} />}
 
       {inProgress.length > 0 && (
-        <div className="surface-panel animate-fade-up border-l-4 border-l-warm p-5">
-          <p className="text-sm font-semibold text-ink">Resume in-progress interview</p>
-          <p className="mt-1 text-sm text-ink-muted">
-            You have {inProgress.length} unfinished session{inProgress.length > 1 ? 's' : ''}.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+        <div className="surface-panel flex flex-col gap-3 border-l-4 border-l-accent p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-ink">Resume in-progress interview</p>
+            <p className="text-xs text-ink-muted">
+              {inProgress.length} unfinished session{inProgress.length > 1 ? 's' : ''}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {inProgress.slice(0, 3).map((s) => (
               <Link key={s.id} to={`/interview/${s.id}`} className="btn btn-secondary text-xs">
                 Continue {s.topic} · {s.difficulty}
@@ -84,7 +85,7 @@ export function DashboardPage() {
 
       {data && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <DashboardCard title="Interviews" value={data.stats.total_interviews} hint="All sessions" />
             <DashboardCard title="Completed" value={data.stats.completed_interviews} hint="Finished mocks" />
             <DashboardCard
@@ -95,9 +96,9 @@ export function DashboardPage() {
             <DashboardCard title="Topics practiced" value={data.stats.topics_practiced} hint="Tracked progress" />
           </div>
 
-          <div className="surface-panel p-5 animate-fade-up stagger-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">Coach note</p>
-            <p className="mt-2 text-sm text-ink">{tip}</p>
+          <div className="surface-panel p-4">
+            <p className="text-xs font-medium text-ink-muted">Coach note</p>
+            <p className="mt-1 text-sm text-ink">{tip}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link to="/study-plan" className="btn btn-secondary text-xs">
                 Open study plan
@@ -110,7 +111,7 @@ export function DashboardPage() {
 
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl text-ink">Recent interviews</h2>
+              <h2 className="text-base font-semibold text-ink">Recent interviews</h2>
               <Link to="/history" className="text-sm font-semibold text-accent hover:underline">
                 View all
               </Link>

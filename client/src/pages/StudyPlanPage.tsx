@@ -63,7 +63,6 @@ export function StudyPlanPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Preparation"
         title="Seven-day study plan"
         description={`Generate a realistic prep schedule based on your weak areas${
           sessionId ? ' and latest interview report' : ''

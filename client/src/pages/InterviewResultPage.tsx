@@ -46,7 +46,6 @@ export function InterviewResultPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        eyebrow="Final report"
         title={session.target_role}
         description={`${session.topic} · ${session.interview_type} · ${session.difficulty}`}
       />

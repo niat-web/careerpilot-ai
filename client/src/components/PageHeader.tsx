@@ -5,33 +5,29 @@ type Props = {
   title: string;
   description?: string;
   actions?: ReactNode;
-  eyebrow?: string;
 };
 
-export function PageHeader({ title, description, actions, eyebrow }: Props) {
+export function PageHeader({ title, description, actions }: Props) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between animate-fade-up">
+    <div className="mb-6 flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        {eyebrow && (
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-ink-muted">{eyebrow}</p>
+        <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">{title}</h1>
+        {description && (
+          <p className="mt-1 max-w-2xl text-sm text-ink-muted">{description}</p>
         )}
-        <h1 className="font-display text-3xl text-ink sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </div>
   );
 }
 
-export function BrandMark({ to = '/', compact = false }: { to?: string; compact?: boolean }) {
+export function BrandMark({ to = '/' }: { to?: string }) {
   return (
-    <Link to={to} className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-sm font-bold text-accent-soft">
+    <Link to={to} className="flex items-center gap-2">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-xs font-bold text-white">
         CP
       </span>
-      {!compact && (
-        <span className="font-display text-lg tracking-tight text-ink">CareerPilot AI</span>
-      )}
+      <span className="text-sm font-semibold text-ink">CareerPilot</span>
     </Link>
   );
 }
