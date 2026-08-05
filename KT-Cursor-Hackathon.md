@@ -329,13 +329,3 @@ Also keep:
 
 ---
 
-## 10. Sharing note (hackathon)
-
-- One Cursor account can typically be shared carefully across **2–3 teams** if needed
-- Do **not** share production secret keys in WhatsApp / public chats
-- Prefer each team using their own Supabase project when possible
-
----
-
-**Document owner:** Hackathon tooling KT  
-**Stack focus:** Cursor → GitHub → Supabase → Render (API) → Vercel (UI)
