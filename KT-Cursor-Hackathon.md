@@ -1,6 +1,6 @@
 # Hackathon — Cursor KT Document
 
-Knowledge Transfer guide for building and deploying a full-stack app with **Cursor**, using **GitHub**, **Vercel**, **Render**, and **Supabase**.
+guide for building and deploying a full-stack app with **Cursor**, using **GitHub**, **Vercel**, **Render**, and **Supabase**.
 
 ---
 
