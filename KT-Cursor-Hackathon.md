@@ -57,6 +57,8 @@ In the chat / agent model dropdown you may see options such as:
 
 Select a model before starting the master prompt (recommended: **Cursor Grok 4.5 Medium**).
 
+[**See Details**](./Cursor-Models-Grok-vs-Composer.md) — when to use Grok 4.5 Medium vs Composer 2.5 (capabilities, workflow, and recommendations).
+
 ---
 
 ## 4. Connect your GitHub account in Cursor
