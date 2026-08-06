@@ -74,7 +74,7 @@ Select a model before starting the master prompt (recommended: **Cursor Grok 4.5
 
 ## 5. Install required plugins in Cursor
 
-Open **Settings → Plugins** and install / enable these three:
+Open **Customise→ Plugins** and install / enable these three:
 
 ### 5.1 Vercel plugin
 **Use case:** Deploy the **frontend** (React / Vite / Next.js static or web app) to Vercel production.  
